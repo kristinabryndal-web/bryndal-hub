@@ -4,6 +4,27 @@ import { collegeData } from '../data/colleges.js'
 
 const essayPct = { 'not-started': 0, 'in-progress': 50, 'done': 100 }
 
+const chanceConfig = {
+  'likely':     { label: '✦ Likely',     bg: '#eaf3de', color: '#3b6d11' },
+  'good':       { label: '◈ Good',       bg: '#e6f1fb', color: '#185fa5' },
+  'possible':   { label: '◇ Possible',   bg: '#faeeda', color: '#854f0b' },
+  'reach':      { label: '△ Reach',      bg: '#fcebeb', color: '#a32d2d' },
+  'long-reach': { label: '▽ Long Reach', bg: '#f5e6fb', color: '#6b2d8b' },
+}
+
+function ChanceBadge({ type }) {
+  const c = chanceConfig[type] || { label: type, bg: '#f1f1f1', color: '#555' }
+  return (
+    <span style={{
+      display: 'inline-block', fontSize: 11, padding: '3px 10px',
+      borderRadius: 6, fontWeight: 500, background: c.bg, color: c.color,
+      whiteSpace: 'nowrap',
+    }}>
+      {c.label}
+    </span>
+  )
+}
+
 export default function Colleges() {
   const { student, school, schools, essays } = collegeData
   const essaysDone = essays.filter(e => e.status === 'done').length
@@ -30,12 +51,13 @@ export default function Colleges() {
           <thead>
             <tr style={{ background: 'var(--bg-secondary)' }}>
               {[
-                { label: 'School',    w: '24%' },
-                { label: 'Strategy', w: '10%' },
-                { label: 'SAT range', w: '14%' },
-                { label: 'Deadline', w: '10%' },
-                { label: 'Interview', w: '28%' },
-                { label: 'Status',   w: '14%' },
+                { label: 'School',    w: '20%' },
+                { label: 'Strategy', w: '9%' },
+                { label: 'SAT range', w: '12%' },
+                { label: 'Deadline', w: '9%' },
+                { label: 'Chase\'s Chances', w: '13%' },
+                { label: 'Interview', w: '22%' },
+                { label: 'Status',   w: '12%' },
               ].map(({ label, w }) => (
                 <th key={label} style={{
                   textAlign: 'left', padding: '10px 14px', fontSize: 11,
@@ -54,6 +76,10 @@ export default function Colleges() {
                 <td style={{ padding: '10px 14px' }}><Badge type={s.strategy} /></td>
                 <td style={{ padding: '10px 14px', color: 'var(--text-secondary)' }}>{s.satRange}</td>
                 <td style={{ padding: '10px 14px' }}>{s.deadline}</td>
+                <td style={{ padding: '10px 14px' }}>
+                  <div><ChanceBadge type={s.chance} /></div>
+                  {s.chanceNote && <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 4, lineHeight: 1.4 }}>{s.chanceNote}</div>}
+                </td>
                 <td style={{ padding: '10px 14px' }}>
                   {s.interview
                     ? <span style={{ color: 'var(--red-mid)', fontSize: 12 }}>⚠ {s.interview}</span>
