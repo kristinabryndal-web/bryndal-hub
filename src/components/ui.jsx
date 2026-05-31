@@ -11,10 +11,11 @@ const badgeStyles = {
   'ED':          { bg: 'var(--blue-light)',  color: 'var(--blue-mid)' },
   'EA':          { bg: 'var(--green-light)', color: 'var(--green-mid)' },
   'Early':       { bg: 'var(--green-light)', color: 'var(--green-mid)' },
-  'Regular':     { bg: '#f1f1f1',            color: '#555' },
+  'Regular':     { bg: '#2a2a2e',            color: '#888' },
+  'RD':          { bg: '#2a2a2e',            color: '#888' },
   'deciding':    { bg: 'var(--amber-light)', color: 'var(--amber-mid)' },
   'yes':         { bg: 'var(--green-light)', color: 'var(--green-mid)' },
-  'no':          { bg: '#f1f1f1',            color: '#555' },
+  'no':          { bg: '#2a2a2e',            color: '#888' },
 }
 
 const badgeLabels = {
@@ -30,7 +31,7 @@ const badgeLabels = {
 }
 
 export function Badge({ type, label }) {
-  const s = badgeStyles[type] || { bg: '#f1f1f1', color: '#555' }
+  const s = badgeStyles[type] || { bg: '#2a2a2e', color: '#888' }
   return (
     <span style={{
       display: 'inline-block', fontSize: 11, padding: '3px 10px',
@@ -46,12 +47,12 @@ export function Badge({ type, label }) {
 export function Metric({ label, value, sub }) {
   return (
     <div style={{
-      background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)',
-      padding: '14px 16px', border: '0.5px solid var(--border)',
+      background: 'var(--bg-card)', borderRadius: 'var(--radius-md)',
+      padding: '16px 18px', border: '1px solid var(--border)',
     }}>
-      <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 6 }}>{label}</div>
-      <div style={{ fontSize: 22, fontWeight: 500, color: 'var(--text)' }}>{value ?? '—'}</div>
-      {sub && <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{sub}</div>}
+      <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.6px', fontWeight: 500 }}>{label}</div>
+      <div style={{ fontSize: 24, fontWeight: 600, color: 'var(--text)', letterSpacing: '-0.5px' }}>{value ?? '—'}</div>
+      {sub && <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 4 }}>{sub}</div>}
     </div>
   )
 }
@@ -60,7 +61,7 @@ export function Metric({ label, value, sub }) {
 export function Card({ children, style }) {
   return (
     <div style={{
-      background: 'var(--bg)', border: '0.5px solid var(--border)',
+      background: 'var(--bg-card)', border: '1px solid var(--border)',
       borderRadius: 'var(--radius-lg)', padding: '18px 20px',
       marginBottom: 12, ...style,
     }}>
@@ -73,8 +74,8 @@ export function Card({ children, style }) {
 export function SectionLabel({ children }) {
   return (
     <div style={{
-      fontSize: 11, fontWeight: 500, textTransform: 'uppercase',
-      letterSpacing: '0.8px', color: 'var(--text-secondary)', marginBottom: 12,
+      fontSize: 11, fontWeight: 600, textTransform: 'uppercase',
+      letterSpacing: '1px', color: 'var(--text-tertiary)', marginBottom: 12, marginTop: 8,
     }}>
       {children}
     </div>
@@ -82,14 +83,14 @@ export function SectionLabel({ children }) {
 }
 
 // ── Progress bar row ────────────────────────────────────
-const progressColors = { weak: '#e24b4a', review: '#ef9f27', good: '#63a022', default: 'var(--blue)' }
+const progressColors = { weak: '#e24b4a', review: '#ef9f27', good: '#4ade80', default: 'var(--blue)' }
 
 export function ProgressRow({ label, pct, status }) {
   const color = progressColors[status] || progressColors.default
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
       <div style={{ fontSize: 13, color: 'var(--text)', minWidth: 200 }}>{label}</div>
-      <div style={{ flex: 1, height: 6, background: 'var(--bg-secondary)', borderRadius: 99, overflow: 'hidden' }}>
+      <div style={{ flex: 1, height: 5, background: 'var(--border)', borderRadius: 99, overflow: 'hidden' }}>
         <div style={{ height: '100%', width: `${pct}%`, background: color, borderRadius: 99, transition: 'width 0.4s' }} />
       </div>
       <div style={{ minWidth: 90, textAlign: 'right' }}><Badge type={status} /></div>
@@ -108,8 +109,8 @@ export function Empty({ message }) {
   return (
     <div style={{
       fontSize: 13, color: 'var(--text-secondary)', textAlign: 'center',
-      padding: '28px 20px', background: 'var(--bg)',
-      border: '0.5px solid var(--border)', borderRadius: 'var(--radius-lg)',
+      padding: '32px 20px', background: 'var(--bg-card)',
+      border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)',
       marginBottom: 12,
     }}>
       {message}

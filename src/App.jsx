@@ -25,23 +25,23 @@ export default function App() {
 
       {/* Top bar */}
       <div style={{
-        background: 'var(--bg)', borderBottom: '0.5px solid var(--border)',
+        background: 'var(--bg)',
+        borderBottom: '1px solid var(--border)',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 28px', height: 56, position: 'sticky', top: 0, zIndex: 10,
+        padding: '0 32px', height: 58, position: 'sticky', top: 0, zIndex: 10,
       }}>
-        <div
-          onClick={() => setPage('home')}
-          style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}
-        >
+        <div onClick={() => setPage('home')} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
           <div style={{
-            width: 8, height: 8, borderRadius: '50%', background: 'var(--blue)',
-          }} />
-          <span style={{ fontSize: 15, fontWeight: 500, letterSpacing: '-0.3px' }}>
+            width: 24, height: 24, borderRadius: 6, background: 'linear-gradient(135deg, #4f8ef7, #a855f7)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 12, fontWeight: 700, color: 'white', letterSpacing: '-0.5px',
+          }}>B</div>
+          <span style={{ fontSize: 15, fontWeight: 600, letterSpacing: '-0.4px', color: 'var(--text)' }}>
             Bryndal Hub
           </span>
         </div>
 
-        <nav style={{ display: 'flex', gap: 4 }}>
+        <nav style={{ display: 'flex', gap: 2 }}>
           {pages.map(p => (
             <button
               key={p.id}
@@ -49,7 +49,7 @@ export default function App() {
               style={{
                 fontSize: 13, padding: '6px 14px', borderRadius: 'var(--radius-md)',
                 border: 'none', cursor: 'pointer', transition: 'all 0.15s',
-                background: page === p.id ? 'var(--bg-secondary)' : 'transparent',
+                background: page === p.id ? 'var(--border-hover)' : 'transparent',
                 color: page === p.id ? 'var(--text)' : 'var(--text-secondary)',
                 fontWeight: page === p.id ? 500 : 400,
               }}
@@ -61,7 +61,7 @@ export default function App() {
       </div>
 
       {/* Page content */}
-      <div style={isEssays ? {} : { maxWidth: 900, margin: '0 auto', padding: '32px 24px' }}>
+      <div style={isEssays ? {} : { maxWidth: 960, margin: '0 auto', padding: '36px 28px' }}>
         <PageComponent onNavigate={setPage} />
       </div>
     </div>
