@@ -5,11 +5,11 @@ import { supabase } from '../supabase.js'
 const essayPct = { 'not-started': 0, 'in-progress': 50, 'done': 100 }
 
 const chanceConfig = {
-  'likely':     { label: '✦ Likely',     bg: '#2d7a2d', color: '#ffffff' },
-  'good':       { label: '◈ Good',       bg: '#c8a000', color: '#ffffff' },
-  'possible':   { label: '◇ Possible',   bg: '#c85a00', color: '#ffffff' },
-  'reach':      { label: '△ Reach',      bg: '#6b2d8b', color: '#ffffff' },
-  'long-reach': { label: '▽ Long Reach', bg: '#a32d2d', color: '#ffffff' },
+  'likely':     { label: '✦ Likely',     bg: '#1a4d1a', color: '#7dda7d' },
+  'good':       { label: '◈ Good',       bg: '#1a3a1a', color: '#b8e090' },
+  'possible':   { label: '◇ Possible',   bg: '#2a1f00', color: '#f0b429' },
+  'reach':      { label: '△ Reach',      bg: '#2d1a4d', color: '#c49af5' },
+  'long-reach': { label: '▽ Long Reach', bg: '#3d0f0f', color: '#f08080' },
 }
 
 const chanceOptions = ['likely', 'good', 'possible', 'reach', 'long-reach']
@@ -160,35 +160,35 @@ export default function Colleges() {
         }}>+ Add School</button>
       </div>
 
-      <Card style={{ padding: 0, overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, tableLayout: 'fixed' }}>
+      <Card style={{ padding: 0, overflowX: 'auto' }}>
+        <table style={{ width: '100%', minWidth: 1000, borderCollapse: 'collapse', fontSize: 13, tableLayout: 'fixed' }}>
           <thead>
             <tr style={{ background: 'var(--bg-secondary)' }}>
               {[
-                { label: 'School',          w: '17%' },
-                { label: 'Strategy',        w: '8%'  },
-                { label: 'SAT range',       w: '10%' },
-                { label: 'Deadline',        w: '9%'  },
-                { label: "Chase's Chances", w: '12%' },
-                { label: 'Interview',       w: '17%' },
-                { label: 'Notes',           w: '15%' },
-                { label: 'Status',          w: '10%' },
-                { label: '',                w: '4%'  },
+                { label: 'School',          w: 200 },
+                { label: 'Strategy',        w: 90  },
+                { label: 'SAT range',       w: 110 },
+                { label: 'Deadline',        w: 100 },
+                { label: "Chase's Chances", w: 140 },
+                { label: 'Interview',       w: 200 },
+                { label: 'Notes',           w: 200 },
+                { label: 'Status',          w: 130 },
+                { label: '',                w: 44  },
               ].map(({ label, w }) => (
-                <th key={label} style={{ textAlign: 'left', padding: '10px 14px', fontSize: 11, fontWeight: 500, color: 'var(--text-secondary)', borderBottom: '0.5px solid var(--border)', width: w }}>{label}</th>
+                <th key={label} style={{ textAlign: 'left', padding: '10px 16px', fontSize: 11, fontWeight: 500, color: 'var(--text-secondary)', borderBottom: '0.5px solid var(--border)', width: w }}>{label}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {schools.map((s, i) => (
               <tr key={s.id} style={{ borderBottom: i < schools.length - 1 ? '0.5px solid var(--border)' : 'none' }}>
-                <td style={{ padding: '10px 14px', fontWeight: i === 0 ? 500 : 400 }}>
+                <td style={{ padding: '12px 16px', fontWeight: i === 0 ? 500 : 400 }}>
                   <EditCell value={s.name} onChange={v => updateSchool(s.id, 'name', v)} />
                 </td>
                 <td style={{ padding: '10px 14px' }}>
                   <SelectCell value={s.strategy} options={strategyOptions} onChange={v => updateSchool(s.id, 'strategy', v)} />
                 </td>
-                <td style={{ padding: '10px 14px', color: 'var(--text-secondary)' }}>
+                <td style={{ padding: '12px 16px', color: 'var(--text-secondary)' }}>
                   <EditCell value={s.sat_range} onChange={v => updateSchool(s.id, 'sat_range', v)} />
                 </td>
                 <td style={{ padding: '10px 14px' }}>
@@ -226,7 +226,7 @@ export default function Colleges() {
                 <td style={{ padding: '10px 14px' }}>
                   <StatusSelect value={s.status} onChange={val => updateSchool(s.id, 'status', val)} />
                 </td>
-                <td style={{ padding: '10px 14px', textAlign: 'center' }}>
+                <td style={{ padding: '12px 16px', textAlign: 'center' }}>
                   <button onClick={() => deleteSchool(s.id)} title="Remove school" style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 14, lineHeight: 1 }}>✕</button>
                 </td>
               </tr>
