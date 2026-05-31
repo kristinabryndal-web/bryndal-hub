@@ -5,11 +5,11 @@ import { supabase } from '../supabase.js'
 const essayPct = { 'not-started': 0, 'in-progress': 50, 'done': 100 }
 
 const chanceConfig = {
-  'likely':     { label: '✦ Likely',     bg: '#eaf3de', color: '#3b6d11' },
-  'good':       { label: '◈ Good',       bg: '#e6f1fb', color: '#185fa5' },
-  'possible':   { label: '◇ Possible',   bg: '#faeeda', color: '#854f0b' },
-  'reach':      { label: '△ Reach',      bg: '#fcebeb', color: '#a32d2d' },
-  'long-reach': { label: '▽ Long Reach', bg: '#f5e6fb', color: '#6b2d8b' },
+  'likely':     { label: '✦ Likely',     bg: '#2d7a2d', color: '#ffffff' },
+  'good':       { label: '◈ Good',       bg: '#c8a000', color: '#ffffff' },
+  'possible':   { label: '◇ Possible',   bg: '#c85a00', color: '#ffffff' },
+  'reach':      { label: '△ Reach',      bg: '#6b2d8b', color: '#ffffff' },
+  'long-reach': { label: '▽ Long Reach', bg: '#a32d2d', color: '#ffffff' },
 }
 
 const chanceOptions = ['likely', 'good', 'possible', 'reach', 'long-reach']
