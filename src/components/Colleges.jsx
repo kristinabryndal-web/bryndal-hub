@@ -195,7 +195,18 @@ export default function Colleges() {
                   <EditCell value={s.deadline} onChange={v => updateSchool(s.id, 'deadline', v)} />
                 </td>
                 <td style={{ padding: '10px 14px' }}>
-                  <SelectCell value={s.chance} options={chanceOptions} onChange={v => updateSchool(s.id, 'chance', v)} />
+                  <select
+                    value={s.chance ?? ''}
+                    onChange={e => updateSchool(s.id, 'chance', e.target.value)}
+                    style={{
+                      fontSize: 11, padding: '3px 10px', borderRadius: 6, fontWeight: 500,
+                      border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+                      background: chanceConfig[s.chance]?.bg || '#f1f1f1',
+                      color: chanceConfig[s.chance]?.color || '#555',
+                    }}
+                  >
+                    {chanceOptions.map(o => <option key={o} value={o}>{chanceConfig[o]?.label || o}</option>)}
+                  </select>
                   {s.chance_note && <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 4, lineHeight: 1.4 }}>{s.chance_note}</div>}
                 </td>
                 <td style={{ padding: '10px 14px' }}>
