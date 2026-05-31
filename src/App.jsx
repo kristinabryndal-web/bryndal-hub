@@ -62,7 +62,7 @@ export default function App() {
       </div>
 
       {/* Page content */}
-      <div style={(isEssays || isColleges) ? (isColleges ? { padding: '36px 28px' } : {}) : { maxWidth: 960, margin: '0 auto', padding: '36px 28px' }}>
+      <div style={isEssays ? { overflow: 'hidden' } : isColleges ? { padding: '36px 28px' } : { maxWidth: 960, margin: '0 auto', padding: '36px 28px' }}>
         <PageComponent onNavigate={setPage} />
       </div>
     </div>

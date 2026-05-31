@@ -146,7 +146,7 @@ export default function Essays() {
   if (loading) return <div style={{ padding: 40, color: 'var(--text-secondary)', fontSize: 13 }}>Loading essays...</div>
 
   return (
-    <div style={{ display: 'flex', height: 'calc(100vh - 56px - 64px)', gap: 0, margin: '-32px -24px', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', height: 'calc(100vh - 58px)', gap: 0, overflow: 'hidden' }}>
 
       {/* Sidebar */}
       <div style={{
@@ -226,7 +226,7 @@ export default function Essays() {
           </div>
 
           {/* Prompt */}
-          <div style={{ padding: '16px 24px', background: '#f8f9fa', borderBottom: '0.5px solid var(--border)', flexShrink: 0 }}>
+          <div style={{ padding: '16px 24px', background: 'var(--bg-card)', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
             <div style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-secondary)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.6px' }}>Prompt</div>
             <InlineEdit
               value={selected.prompt}
