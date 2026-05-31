@@ -117,3 +117,11 @@ insert into checklist (text, done, sort_order) values
 ('Begin Common App personal statement',                     false, 5),
 ('Submit BC ED application by Nov 1',                       false, 6),
 ('Schedule Wake Forest interview within 5 days of applying',false, 7);
+
+-- ─────────────────────────────────────────────────────────────
+--  ADD CONTENT AND PROMPT COLUMNS TO ESSAYS (run this separately
+--  if you already ran the schema above)
+-- ─────────────────────────────────────────────────────────────
+alter table essays add column if not exists content text default '';
+alter table essays add column if not exists prompt text default '';
+alter table essays add column if not exists word_limit integer default 650;

@@ -3,19 +3,22 @@ import Home from './components/Home.jsx'
 import SAT from './components/SAT.jsx'
 import ACT from './components/ACT.jsx'
 import Colleges from './components/Colleges.jsx'
+import Essays from './components/Essays.jsx'
 
 const pages = [
   { id: 'home',     label: 'Home' },
   { id: 'sat',      label: 'SAT Prep' },
   { id: 'act',      label: 'ACT Prep' },
   { id: 'colleges', label: 'College Tracker' },
+  { id: 'essays',   label: 'Essays' },
 ]
 
 export default function App() {
   const [page, setPage] = useState('home')
 
-  const pageMap = { home: Home, sat: SAT, act: ACT, colleges: Colleges }
+  const pageMap = { home: Home, sat: SAT, act: ACT, colleges: Colleges, essays: Essays }
   const PageComponent = pageMap[page] || Home
+  const isEssays = page === 'essays'
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-secondary)' }}>
@@ -58,7 +61,7 @@ export default function App() {
       </div>
 
       {/* Page content */}
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: '32px 24px' }}>
+      <div style={isEssays ? {} : { maxWidth: 900, margin: '0 auto', padding: '32px 24px' }}>
         <PageComponent onNavigate={setPage} />
       </div>
     </div>
