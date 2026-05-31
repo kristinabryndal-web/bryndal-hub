@@ -134,7 +134,7 @@ export default function Colleges() {
     await supabase.from('schools').delete().eq('id', id)
   }
 
-  const essaysDone = essays.filter(e => e.status === 'done').length
+  const essaysDone = essays.filter(e => e.content && e.content.trim().length > 0).length
 
   if (loading) return <div style={{ padding: 40, color: 'var(--text-secondary)', fontSize: 13 }}>Loading...</div>
 
