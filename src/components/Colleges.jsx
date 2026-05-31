@@ -161,17 +161,17 @@ export default function Colleges() {
       </div>
 
       <Card style={{ padding: 0, overflowX: 'auto' }}>
-        <table style={{ width: '100%', minWidth: 1000, borderCollapse: 'collapse', fontSize: 13, tableLayout: 'fixed' }}>
+        <table style={{ width: '100%', minWidth: 1200, borderCollapse: 'collapse', fontSize: 13, tableLayout: 'fixed' }}>
           <thead>
             <tr style={{ background: 'var(--bg-secondary)' }}>
               {[
-                { label: 'School',          w: 200 },
-                { label: 'Strategy',        w: 90  },
+                { label: 'School',          w: 180 },
+                { label: 'Strategy',        w: 80  },
                 { label: 'SAT range',       w: 110 },
-                { label: 'Deadline',        w: 100 },
-                { label: "Chase's Chances", w: 140 },
-                { label: 'Interview',       w: 200 },
-                { label: 'Notes',           w: 200 },
+                { label: 'Deadline',        w: 90  },
+                { label: "Chase's Chances", w: 130 },
+                { label: 'Interview',       w: 180 },
+                { label: 'Notes',           w: 240 },
                 { label: 'Status',          w: 130 },
                 { label: '',                w: 44  },
               ].map(({ label, w }) => (
@@ -207,7 +207,7 @@ export default function Colleges() {
                   >
                     {chanceOptions.map(o => <option key={o} value={o}>{chanceConfig[o]?.label || o}</option>)}
                   </select>
-                  {s.chance_note && <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 4, lineHeight: 1.4 }}>{s.chance_note}</div>}
+                  {s.chance_note && <div title={s.chance_note} style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.chance_note}</div>}
                 </td>
                 <td style={{ padding: '10px 14px' }}>
                   <EditCell
