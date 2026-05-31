@@ -19,6 +19,7 @@ export default function App() {
   const pageMap = { home: Home, sat: SAT, act: ACT, colleges: Colleges, essays: Essays }
   const PageComponent = pageMap[page] || Home
   const isEssays = page === 'essays'
+  const isColleges = page === 'colleges'
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-secondary)' }}>
@@ -61,7 +62,7 @@ export default function App() {
       </div>
 
       {/* Page content */}
-      <div style={isEssays ? {} : { maxWidth: 960, margin: '0 auto', padding: '36px 28px' }}>
+      <div style={(isEssays || isColleges) ? (isColleges ? { padding: '36px 28px' } : {}) : { maxWidth: 960, margin: '0 auto', padding: '36px 28px' }}>
         <PageComponent onNavigate={setPage} />
       </div>
     </div>
