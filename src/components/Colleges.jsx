@@ -170,8 +170,8 @@ export default function Colleges() {
                 { label: 'SAT range',       w: 110 },
                 { label: 'Deadline',        w: 90  },
                 { label: "Chase's Chances", w: 130 },
-                { label: 'Interview',       w: 180 },
-                { label: 'Notes',           w: 240 },
+                { label: 'Interview',       w: 80  },
+                { label: 'Notes',           w: 320 },
                 { label: 'Status',          w: 130 },
                 { label: '',                w: 44  },
               ].map(({ label, w }) => (
@@ -209,11 +209,13 @@ export default function Colleges() {
                   </select>
                   {s.chance_note && <div title={s.chance_note} style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.chance_note}</div>}
                 </td>
-                <td style={{ padding: '10px 14px' }}>
-                  <EditCell
-                    value={s.interview}
-                    onChange={v => updateSchool(s.id, 'interview', v)}
-                    style={s.interview ? { color: 'var(--red-mid)' } : { color: 'var(--text-tertiary)' }}
+                <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                  <input
+                    type="checkbox"
+                    checked={!!s.interview}
+                    title={typeof s.interview === 'string' && s.interview.length > 1 ? s.interview : 'Interview required'}
+                    onChange={e => updateSchool(s.id, 'interview', e.target.checked ? 'Yes' : '')}
+                    style={{ width: 16, height: 16, cursor: 'pointer', accentColor: 'var(--blue)' }}
                   />
                 </td>
                 <td style={{ padding: '10px 14px' }}>
