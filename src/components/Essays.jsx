@@ -27,6 +27,59 @@ function wordCount(text) {
   return text.trim().split(/\s+/).length
 }
 
+function InlineEdit({ value, onChange, multiline = false, placeholder = '', style = {} }) {
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState(value ?? '')
+  const ref = useRef()
+
+  useEffect(() => { if (editing) ref.current?.focus() }, [editing])
+
+  function commit() {
+    setEditing(false)
+    if (draft !== value) onChange(draft)
+  }
+
+  const baseStyle = {
+    fontSize: 'inherit', fontFamily: 'inherit', lineHeight: 'inherit',
+    border: 'none', outline: 'none', background: 'transparent', color: 'inherit',
+    width: '100%', padding: 0, cursor: 'text', ...style,
+  }
+
+  if (editing) {
+    return multiline ? (
+      <textarea
+        ref={ref}
+        value={draft}
+        onChange={e => setDraft(e.target.value)}
+        onBlur={commit}
+        rows={3}
+        style={{ ...baseStyle, border: '1px solid var(--blue)', borderRadius: 4, padding: '4px 6px', resize: 'vertical', background: 'var(--bg)' }}
+      />
+    ) : (
+      <input
+        ref={ref}
+        value={draft}
+        onChange={e => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={e => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') { setDraft(value ?? ''); setEditing(false) } }}
+        style={{ ...baseStyle, border: '1px solid var(--blue)', borderRadius: 4, padding: '2px 6px', background: 'var(--bg)' }}
+      />
+    )
+  }
+
+  return (
+    <span
+      onClick={() => { setDraft(value ?? ''); setEditing(true) }}
+      title="Click to edit"
+      style={{ display: 'block', cursor: 'text', borderRadius: 4, padding: '1px 2px', transition: 'background 0.1s', ...style }}
+      onMouseEnter={e => e.currentTarget.style.outline = '1px dashed var(--border)'}
+      onMouseLeave={e => e.currentTarget.style.outline = 'none'}
+    >
+      {value || <span style={{ color: 'var(--text-tertiary)', fontStyle: 'italic' }}>{placeholder}</span>}
+    </span>
+  )
+}
+
 export default function Essays() {
   const [essays, setEssays]       = useState([])
   const [selected, setSelected]   = useState(null)
@@ -43,7 +96,6 @@ export default function Essays() {
       setEssays(data)
       setSelected(data[0])
     } else {
-      // Seed essays if none exist
       const toInsert = DEFAULT_ESSAYS.map((e, i) => ({ ...e, sort_order: i + 1 }))
       const { data: inserted } = await supabase.from('essays').insert(toInsert).select()
       if (inserted) { setEssays(inserted); setSelected(inserted[0]) }
@@ -51,24 +103,39 @@ export default function Essays() {
     setLoading(false)
   }
 
-  const autoSave = useCallback((essay) => {
+  const autoSave = useCallback((essay, fields) => {
     if (saveTimer.current) clearTimeout(saveTimer.current)
     saveTimer.current = setTimeout(async () => {
       setSaving(true)
-      await supabase.from('essays').update({
-        content: essay.content,
-        status: essay.status,
-      }).eq('id', essay.id)
+      await supabase.from('essays').update(fields).eq('id', essay.id)
       setSaving(false)
       setLastSaved(new Date())
-    }, 1000)
+    }, 800)
   }, [])
 
   function updateSelected(field, value) {
     const updated = { ...selected, [field]: value }
     setSelected(updated)
     setEssays(prev => prev.map(e => e.id === updated.id ? updated : e))
-    autoSave(updated)
+    autoSave(updated, { [field]: value })
+  }
+
+  async function addEssay() {
+    const sort_order = essays.length + 1
+    const { data } = await supabase.from('essays').insert([{
+      name: 'New Essay', prompt: '', word_limit: 250, due: '', status: 'not-started', content: '', sort_order,
+    }]).select()
+    if (data) {
+      setEssays(prev => [...prev, data[0]])
+      setSelected(data[0])
+    }
+  }
+
+  async function deleteEssay(id) {
+    const remaining = essays.filter(e => e.id !== id)
+    setEssays(remaining)
+    if (selected?.id === id) setSelected(remaining[0] ?? null)
+    await supabase.from('essays').delete().eq('id', id)
   }
 
   const wc = selected ? wordCount(selected.content) : 0
@@ -85,24 +152,35 @@ export default function Essays() {
       <div style={{
         width: 260, flexShrink: 0, borderRight: '0.5px solid var(--border)',
         background: 'var(--bg-secondary)', overflowY: 'auto', padding: '16px 0',
+        display: 'flex', flexDirection: 'column',
       }}>
-        <div style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.8px', color: 'var(--text-secondary)', padding: '0 16px', marginBottom: 10 }}>
-          Essays
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px', marginBottom: 10 }}>
+          <div style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.8px', color: 'var(--text-secondary)' }}>Essays</div>
+          <button onClick={addEssay} title="Add essay" style={{ background: 'none', border: 'none', color: 'var(--blue)', cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 0 }}>+</button>
         </div>
         {essays.map(e => {
           const wc = wordCount(e.content)
           const isActive = selected?.id === e.id
           const sc = statusConfig[e.status] || statusConfig['not-started']
           return (
-            <div key={e.id} onClick={() => setSelected(e)} style={{
-              padding: '10px 16px', cursor: 'pointer', borderLeft: isActive ? '2px solid var(--blue)' : '2px solid transparent',
-              background: isActive ? 'var(--bg)' : 'transparent', transition: 'all 0.1s',
-            }}>
-              <div style={{ fontSize: 12, fontWeight: isActive ? 500 : 400, color: 'var(--text)', lineHeight: 1.4, marginBottom: 4 }}>{e.name}</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 4, fontWeight: 500, background: sc.bg, color: sc.color }}>{sc.label}</span>
-                <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{wc}/{e.word_limit ?? '—'}</span>
+            <div key={e.id} style={{ position: 'relative' }}>
+              <div onClick={() => setSelected(e)} style={{
+                padding: '10px 16px', cursor: 'pointer', borderLeft: isActive ? '2px solid var(--blue)' : '2px solid transparent',
+                background: isActive ? 'var(--bg)' : 'transparent', transition: 'all 0.1s',
+              }}>
+                <div style={{ fontSize: 12, fontWeight: isActive ? 500 : 400, color: 'var(--text)', lineHeight: 1.4, marginBottom: 4, paddingRight: 20 }}>{e.name}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 4, fontWeight: 500, background: sc.bg, color: sc.color }}>{sc.label}</span>
+                  <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{wc}/{e.word_limit ?? '—'}</span>
+                </div>
               </div>
+              <button
+                onClick={() => deleteEssay(e.id)}
+                title="Delete essay"
+                style={{ position: 'absolute', top: 10, right: 12, background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 12, opacity: isActive ? 1 : 0, transition: 'opacity 0.1s' }}
+                onMouseEnter={e => e.currentTarget.style.opacity = 1}
+                onMouseLeave={e => e.currentTarget.style.opacity = isActive ? 1 : 0}
+              >✕</button>
             </div>
           )
         })}
@@ -112,17 +190,27 @@ export default function Essays() {
       {selected && (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'var(--bg)' }}>
 
-          {/* Editor toolbar */}
+          {/* Toolbar */}
           <div style={{
             padding: '12px 24px', borderBottom: '0.5px solid var(--border)',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0,
           }}>
-            <div>
-              <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 2 }}>{selected.name}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Due: {selected.due}</div>
+            <div style={{ flex: 1, marginRight: 16 }}>
+              <InlineEdit
+                value={selected.name}
+                onChange={v => updateSelected('name', v)}
+                placeholder="Essay name"
+                style={{ fontSize: 15, fontWeight: 500, marginBottom: 2 }}
+              />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 11, color: 'var(--text-secondary)' }}>
+                <span>Due:</span>
+                <InlineEdit value={selected.due} onChange={v => updateSelected('due', v)} placeholder="Date" style={{ fontSize: 11, color: 'var(--text-secondary)' }} />
+                <span style={{ marginLeft: 8 }}>Limit:</span>
+                <InlineEdit value={String(selected.word_limit ?? '')} onChange={v => updateSelected('word_limit', parseInt(v) || 0)} placeholder="Words" style={{ fontSize: 11, color: 'var(--text-secondary)', width: 50 }} />
+                <span>words</span>
+              </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              {/* Status selector */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
               <select value={selected.status} onChange={e => updateSelected('status', e.target.value)} style={{
                 fontSize: 12, padding: '5px 10px', borderRadius: 6, border: '0.5px solid var(--border)',
                 background: 'var(--bg)', color: 'var(--text)', fontFamily: 'inherit', cursor: 'pointer',
@@ -131,7 +219,6 @@ export default function Essays() {
                   <option key={val} value={val}>{label}</option>
                 ))}
               </select>
-              {/* Save indicator */}
               <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
                 {saving ? 'Saving...' : lastSaved ? `Saved ${lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''}
               </div>
@@ -141,7 +228,13 @@ export default function Essays() {
           {/* Prompt */}
           <div style={{ padding: '16px 24px', background: '#f8f9fa', borderBottom: '0.5px solid var(--border)', flexShrink: 0 }}>
             <div style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-secondary)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.6px' }}>Prompt</div>
-            <div style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.6 }}>{selected.prompt}</div>
+            <InlineEdit
+              value={selected.prompt}
+              onChange={v => updateSelected('prompt', v)}
+              placeholder="Paste the essay prompt here..."
+              multiline
+              style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.6 }}
+            />
           </div>
 
           {/* Text area */}

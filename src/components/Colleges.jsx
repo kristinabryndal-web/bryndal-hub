@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Metric, Card, SectionLabel, Badge, ProgressRow } from './ui.jsx'
 import { supabase } from '../supabase.js'
 
@@ -12,6 +12,8 @@ const chanceConfig = {
   'long-reach': { label: '▽ Long Reach', bg: '#f5e6fb', color: '#6b2d8b' },
 }
 
+const chanceOptions = ['likely', 'good', 'possible', 'reach', 'long-reach']
+const strategyOptions = ['ED', 'EA', 'RD', 'ED2']
 const statusOptions = ['not-started', 'in-progress', 'done']
 const essayStatusOptions = ['not-started', 'in-progress', 'done']
 
@@ -35,10 +37,64 @@ function StatusSelect({ value, onChange }) {
   )
 }
 
+// Inline editable cell — shows text normally, becomes an input on click
+function EditCell({ value, onChange, type = 'text', style = {} }) {
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState(value ?? '')
+  const ref = useRef()
+
+  useEffect(() => { if (editing) ref.current?.focus() }, [editing])
+
+  function commit() {
+    setEditing(false)
+    if (draft !== value) onChange(draft)
+  }
+
+  if (editing) {
+    return (
+      <input
+        ref={ref}
+        type={type}
+        value={draft}
+        onChange={e => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={e => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') { setDraft(value ?? ''); setEditing(false) } }}
+        style={{ width: '100%', padding: '3px 6px', fontSize: 13, borderRadius: 4, border: '1px solid var(--blue)', fontFamily: 'inherit', outline: 'none', ...style }}
+      />
+    )
+  }
+
+  return (
+    <span
+      onClick={() => { setDraft(value ?? ''); setEditing(true) }}
+      title="Click to edit"
+      style={{ cursor: 'text', display: 'block', minHeight: 20, borderRadius: 4, padding: '1px 2px', transition: 'background 0.1s', ...style }}
+      onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-secondary)'}
+      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+    >
+      {value || <span style={{ color: 'var(--text-tertiary)' }}>—</span>}
+    </span>
+  )
+}
+
+// Select cell for fixed-option fields
+function SelectCell({ value, options, onChange, renderValue }) {
+  return (
+    <select
+      value={value ?? ''}
+      onChange={e => onChange(e.target.value)}
+      style={{ fontSize: 11, padding: '2px 6px', borderRadius: 6, border: '0.5px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', fontFamily: 'inherit', cursor: 'pointer' }}
+    >
+      {options.map(o => <option key={o} value={o}>{o}</option>)}
+    </select>
+  )
+}
+
 export default function Colleges() {
-  const [schools, setSchools]   = useState([])
-  const [essays, setEssays]     = useState([])
-  const [loading, setLoading]   = useState(true)
+  const [schools, setSchools]     = useState([])
+  const [essays, setEssays]       = useState([])
+  const [loading, setLoading]     = useState(true)
+  const [expandedNotes, setExpandedNotes] = useState(null)
 
   useEffect(() => {
     Promise.all([fetchSchools(), fetchEssays()]).then(() => setLoading(false))
@@ -54,14 +110,28 @@ export default function Colleges() {
     if (data) setEssays(data)
   }
 
-  async function updateSchoolStatus(id, status) {
-    setSchools(prev => prev.map(s => s.id === id ? { ...s, status } : s))
-    await supabase.from('schools').update({ status }).eq('id', id)
+  async function updateSchool(id, field, value) {
+    setSchools(prev => prev.map(s => s.id === id ? { ...s, [field]: value } : s))
+    await supabase.from('schools').update({ [field]: value }).eq('id', id)
   }
 
   async function updateEssayStatus(id, status) {
     setEssays(prev => prev.map(e => e.id === id ? { ...e, status } : e))
     await supabase.from('essays').update({ status }).eq('id', id)
+  }
+
+  async function addSchool() {
+    const sort_order = schools.length + 1
+    const { data } = await supabase.from('schools').insert([{
+      name: 'New School', strategy: 'RD', sat_range: '', deadline: '', chance: 'possible',
+      interview: '', status: 'not-started', notes: '', sort_order,
+    }]).select()
+    if (data) setSchools(prev => [...prev, data[0]])
+  }
+
+  async function deleteSchool(id) {
+    setSchools(prev => prev.filter(s => s.id !== id))
+    await supabase.from('schools').delete().eq('id', id)
   }
 
   const essaysDone = essays.filter(e => e.status === 'done').length
@@ -82,19 +152,28 @@ export default function Colleges() {
         <Metric label="Next deadline"    value="Nov 1" sub="BC ED / Wake / Villanova / TCU" />
       </div>
 
-      <SectionLabel>School list</SectionLabel>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+        <SectionLabel>School list</SectionLabel>
+        <button onClick={addSchool} style={{
+          fontSize: 12, padding: '5px 12px', borderRadius: 6, border: '0.5px solid var(--border)',
+          background: 'var(--blue)', color: 'white', cursor: 'pointer', fontWeight: 500,
+        }}>+ Add School</button>
+      </div>
+
       <Card style={{ padding: 0, overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, tableLayout: 'fixed' }}>
           <thead>
             <tr style={{ background: 'var(--bg-secondary)' }}>
               {[
-                { label: 'School',          w: '18%' },
-                { label: 'Strategy',        w: '9%'  },
-                { label: 'SAT range',       w: '11%' },
+                { label: 'School',          w: '17%' },
+                { label: 'Strategy',        w: '8%'  },
+                { label: 'SAT range',       w: '10%' },
                 { label: 'Deadline',        w: '9%'  },
-                { label: "Chase's Chances", w: '13%' },
-                { label: 'Interview',       w: '20%' },
-                { label: 'Status',          w: '14%' },
+                { label: "Chase's Chances", w: '12%' },
+                { label: 'Interview',       w: '17%' },
+                { label: 'Notes',           w: '15%' },
+                { label: 'Status',          w: '10%' },
+                { label: '',                w: '4%'  },
               ].map(({ label, w }) => (
                 <th key={label} style={{ textAlign: 'left', padding: '10px 14px', fontSize: 11, fontWeight: 500, color: 'var(--text-secondary)', borderBottom: '0.5px solid var(--border)', width: w }}>{label}</th>
               ))}
@@ -103,21 +182,41 @@ export default function Colleges() {
           <tbody>
             {schools.map((s, i) => (
               <tr key={s.id} style={{ borderBottom: i < schools.length - 1 ? '0.5px solid var(--border)' : 'none' }}>
-                <td style={{ padding: '10px 14px', fontWeight: i === 0 ? 500 : 400 }}>{s.name}</td>
-                <td style={{ padding: '10px 14px' }}><Badge type={s.strategy} /></td>
-                <td style={{ padding: '10px 14px', color: 'var(--text-secondary)' }}>{s.sat_range}</td>
-                <td style={{ padding: '10px 14px' }}>{s.deadline}</td>
+                <td style={{ padding: '10px 14px', fontWeight: i === 0 ? 500 : 400 }}>
+                  <EditCell value={s.name} onChange={v => updateSchool(s.id, 'name', v)} />
+                </td>
                 <td style={{ padding: '10px 14px' }}>
-                  <ChanceBadge type={s.chance} />
+                  <SelectCell value={s.strategy} options={strategyOptions} onChange={v => updateSchool(s.id, 'strategy', v)} />
+                </td>
+                <td style={{ padding: '10px 14px', color: 'var(--text-secondary)' }}>
+                  <EditCell value={s.sat_range} onChange={v => updateSchool(s.id, 'sat_range', v)} />
+                </td>
+                <td style={{ padding: '10px 14px' }}>
+                  <EditCell value={s.deadline} onChange={v => updateSchool(s.id, 'deadline', v)} />
+                </td>
+                <td style={{ padding: '10px 14px' }}>
+                  <SelectCell value={s.chance} options={chanceOptions} onChange={v => updateSchool(s.id, 'chance', v)} />
                   {s.chance_note && <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 4, lineHeight: 1.4 }}>{s.chance_note}</div>}
                 </td>
                 <td style={{ padding: '10px 14px' }}>
-                  {s.interview
-                    ? <span style={{ color: 'var(--red-mid)', fontSize: 11 }}>⚠ {s.interview}</span>
-                    : <span style={{ color: 'var(--text-tertiary)' }}>—</span>}
+                  <EditCell
+                    value={s.interview}
+                    onChange={v => updateSchool(s.id, 'interview', v)}
+                    style={s.interview ? { color: 'var(--red-mid)' } : { color: 'var(--text-tertiary)' }}
+                  />
                 </td>
                 <td style={{ padding: '10px 14px' }}>
-                  <StatusSelect value={s.status} onChange={val => updateSchoolStatus(s.id, val)} />
+                  <EditCell
+                    value={s.notes}
+                    onChange={v => updateSchool(s.id, 'notes', v)}
+                    style={{ color: 'var(--text-secondary)', fontSize: 12 }}
+                  />
+                </td>
+                <td style={{ padding: '10px 14px' }}>
+                  <StatusSelect value={s.status} onChange={val => updateSchool(s.id, 'status', val)} />
+                </td>
+                <td style={{ padding: '10px 14px', textAlign: 'center' }}>
+                  <button onClick={() => deleteSchool(s.id)} title="Remove school" style={{ background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', fontSize: 14, lineHeight: 1 }}>✕</button>
                 </td>
               </tr>
             ))}
@@ -142,16 +241,6 @@ export default function Colleges() {
             }}>
               {essayStatusOptions.map(s => <option key={s} value={s}>{s.replace('-', ' ').replace(/^\w/, c => c.toUpperCase())}</option>)}
             </select>
-          </div>
-        ))}
-      </Card>
-
-      <SectionLabel>Notes & highlights</SectionLabel>
-      <Card>
-        {schools.filter(s => s.notes).map((s, i, arr) => (
-          <div key={s.id} style={{ fontSize: 13, padding: '8px 0', borderBottom: i < arr.length - 1 ? '0.5px solid var(--border)' : 'none' }}>
-            <strong>{s.name}:</strong>{' '}
-            <span style={{ color: 'var(--text-secondary)' }}>{s.notes}</span>
           </div>
         ))}
       </Card>
