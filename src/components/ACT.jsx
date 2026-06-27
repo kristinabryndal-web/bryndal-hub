@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Metric, Card, SectionLabel, Badge, Empty, daysUntil } from './ui.jsx'
 import { supabase } from '../supabase.js'
 import { actData } from '../data/act.js'
+import Practice from './Practice.jsx'
 
 export default function ACT() {
   const [tests, setTests] = useState([])
@@ -149,6 +150,10 @@ export default function ACT() {
           </table>
         </Card>
       )}
+
+      <div style={{ marginTop: 32 }}>
+        <Practice />
+      </div>
     </div>
   )
 }
