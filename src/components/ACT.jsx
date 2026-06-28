@@ -3,6 +3,8 @@ import { Metric, Card, SectionLabel, Badge, Empty, daysUntil } from './ui.jsx'
 import { supabase } from '../supabase.js'
 import { actData } from '../data/act.js'
 import Practice from './Practice.jsx'
+import { PracticeQuiz } from './PracticeQuiz.jsx'
+import { actConventions } from '../data/practiceQuestions.js'
 
 export default function ACT() {
   const [tests, setTests] = useState([])
@@ -153,6 +155,14 @@ export default function ACT() {
 
       <div style={{ marginTop: 32 }}>
         <Practice />
+      </div>
+
+      <div style={{ marginTop: 32 }}>
+        <PracticeQuiz
+          title="English Conventions — Passage Practice"
+          subtitle="ACT-style passage questions targeting grammar and usage"
+          questions={actConventions}
+        />
       </div>
     </div>
   )

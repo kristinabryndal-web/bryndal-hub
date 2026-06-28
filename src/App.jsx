@@ -4,19 +4,21 @@ import SAT from './components/SAT.jsx'
 import ACT from './components/ACT.jsx'
 import Colleges from './components/Colleges.jsx'
 import Essays from './components/Essays.jsx'
+import StudyGuide from './components/StudyGuide.jsx'
 
 const pages = [
-  { id: 'home',     label: 'Home' },
-  { id: 'sat',      label: 'SAT Prep' },
-  { id: 'act',      label: 'ACT Prep' },
-  { id: 'colleges', label: 'College Tracker' },
-  { id: 'essays',   label: 'Essays' },
+  { id: 'home',       label: 'Home' },
+  { id: 'sat',        label: 'SAT Prep' },
+  { id: 'act',        label: 'ACT Prep' },
+  { id: 'studyguide', label: 'Math Guide' },
+  { id: 'colleges',   label: 'College Tracker' },
+  { id: 'essays',     label: 'Essays' },
 ]
 
 export default function App() {
   const [page, setPage] = useState('home')
 
-  const pageMap = { home: Home, sat: SAT, act: ACT, colleges: Colleges, essays: Essays }
+  const pageMap = { home: Home, sat: SAT, act: ACT, studyguide: StudyGuide, colleges: Colleges, essays: Essays }
   const PageComponent = pageMap[page] || Home
   const isEssays = page === 'essays'
   const isColleges = page === 'colleges'
