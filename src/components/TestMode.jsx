@@ -1,5 +1,12 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { practiceTests, sectionMeta, getChoices, lookupScaled } from '../data/practiceTests.js'
+import { g19Math, g20Math, h11Math } from '../data/testQuestions.js'
+
+const QUESTION_DATA = {
+  G19: { math: g19Math },
+  G20: { math: g20Math },
+  H11: { math: h11Math },
+}
 
 const STORAGE_KEY = 'bryndal_test_history'
 
@@ -139,27 +146,151 @@ function SelectSection({ test, onSelect, onBack }) {
 
 // ── Screen: Taking the Test ────────────────────────────────────────────────
 
+function TestHeader({ test, section, answered, total, timeLeft, timerActive, onStart, onSubmit, onBack }) {
+  const m = sectionMeta[section]
+  const timerColor = timeLeft <= 120 ? '#f08080' : timeLeft <= 300 ? '#f0b429' : 'var(--text-secondary)'
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, position: 'sticky', top: 58, background: 'var(--bg-secondary)', padding: '10px 0', zIndex: 5 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <button onClick={onBack} style={{ fontSize: 13, color: 'var(--text-secondary)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>← Back</button>
+        <span style={{ fontSize: 14, fontWeight: 600 }}>Form {test.id} · {m.label}</span>
+        <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{answered}/{total} answered</span>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <span style={{ fontSize: 20, fontWeight: 700, fontFamily: 'monospace', color: timerColor }}>
+          {formatTime(timeLeft)}
+        </span>
+        {!timerActive ? (
+          <button onClick={onStart} style={{ fontSize: 13, padding: '6px 16px', borderRadius: 8, background: 'var(--blue)', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
+            Start Timer
+          </button>
+        ) : (
+          <button onClick={onSubmit} style={{ fontSize: 13, padding: '6px 16px', borderRadius: 8, background: '#2d1a4d', color: '#c49af5', border: '1px solid #c49af5', cursor: 'pointer', fontWeight: 600 }}>
+            Submit
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function DigitalTest({ test, section, questions, answers, onAnswer, m }) {
+  const [current, setCurrent] = useState(0)
+  const q = questions[current]
+  const chosen = answers[q.num]
+
+  const prevContext = current > 0 ? questions[current - 1].context : null
+  const showContext = q.context || (q.contextRef && !prevContext)
+
+  return (
+    <div style={{ display: 'flex', gap: 20 }}>
+      {/* Question navigator sidebar */}
+      <div style={{ width: 200, flexShrink: 0 }}>
+        <div style={{ fontSize: 11, color: 'var(--text-secondary)', fontWeight: 500, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Questions</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 4 }}>
+          {questions.map((qq, i) => {
+            const isChosen = answers[qq.num]
+            const isCurrent = i === current
+            return (
+              <button key={qq.num} onClick={() => setCurrent(i)} style={{
+                height: 32, borderRadius: 6, fontSize: 12, fontWeight: 600,
+                border: isCurrent ? `2px solid ${m.color}` : '1px solid var(--border)',
+                background: isChosen ? m.bg : 'var(--bg)',
+                color: isChosen ? m.color : isCurrent ? m.color : 'var(--text-secondary)',
+                cursor: 'pointer',
+              }}>
+                {qq.num}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Main question area */}
+      <div style={{ flex: 1 }}>
+        {/* Context block */}
+        {showContext && (
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 18px', marginBottom: 16, fontSize: 13, lineHeight: 1.7, color: 'var(--text-secondary)', whiteSpace: 'pre-line' }}>
+            {q.context || q.contextRef}
+          </div>
+        )}
+
+        {/* Question card */}
+        <div style={{ background: 'var(--bg-card)', border: `1px solid var(--border)`, borderRadius: 12, padding: '20px 22px', marginBottom: 16 }}>
+          <div style={{ fontSize: 11, color: m.color, fontWeight: 700, marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            Question {q.num} of {questions.length}
+          </div>
+          <div style={{ fontSize: 14, lineHeight: 1.75, marginBottom: q.hasFigure || q.choices.length ? 18 : 0, whiteSpace: 'pre-line' }}>
+            {q.question}
+          </div>
+
+          {q.hasFigure && (
+            <div style={{ background: 'var(--bg-secondary)', border: '1px dashed var(--border)', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 12, color: 'var(--text-secondary)', fontStyle: 'italic' }}>
+              📐 {q.figure || 'Figure — refer to the printed test booklet for the diagram.'}
+            </div>
+          )}
+
+          {/* Answer choices */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {q.choices.map(choice => {
+              const letter = choice[0]
+              const text = choice.slice(3)
+              const isSelected = chosen === letter
+              return (
+                <button key={letter} onClick={() => onAnswer(q.num, isSelected ? undefined : letter)} style={{
+                  display: 'flex', alignItems: 'flex-start', gap: 12, padding: '10px 14px',
+                  borderRadius: 8, border: isSelected ? `2px solid ${m.color}` : '1px solid var(--border)',
+                  background: isSelected ? m.bg : 'var(--bg)', cursor: 'pointer', textAlign: 'left',
+                  transition: 'all 0.1s',
+                }}>
+                  <span style={{
+                    width: 26, height: 26, borderRadius: '50%', flexShrink: 0,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 12, fontWeight: 700,
+                    background: isSelected ? m.color : 'var(--border)',
+                    color: isSelected ? '#000' : 'var(--text-secondary)',
+                  }}>{letter}</span>
+                  <span style={{ fontSize: 14, lineHeight: 1.5, color: 'var(--text)', paddingTop: 2 }}>{text}</span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Prev / Next */}
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <button onClick={() => setCurrent(c => Math.max(0, c - 1))} disabled={current === 0}
+            style={{ fontSize: 13, padding: '8px 18px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-secondary)', cursor: current === 0 ? 'default' : 'pointer', opacity: current === 0 ? 0.4 : 1 }}>
+            ← Prev
+          </button>
+          <button onClick={() => setCurrent(c => Math.min(questions.length - 1, c + 1))} disabled={current === questions.length - 1}
+            style={{ fontSize: 13, padding: '8px 18px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-secondary)', cursor: current === questions.length - 1 ? 'default' : 'pointer', opacity: current === questions.length - 1 ? 0.4 : 1 }}>
+            Next →
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function TakingTest({ test, section, onSubmit, onBack }) {
   const sd = test.sections[section]
   const m = sectionMeta[section]
+  const questions = QUESTION_DATA[test.id]?.[section] ?? null
   const [answers, setAnswers] = useState({})
   const [timeLeft, setTimeLeft] = useState(sd.minutes * 60)
   const [timerActive, setTimerActive] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const intervalRef = useRef(null)
 
-  const answered = Object.keys(answers).length
+  const answered = Object.keys(answers).filter(k => answers[k] !== undefined).length
   const total = sd.count
 
   useEffect(() => {
     if (timerActive && !submitted) {
       intervalRef.current = setInterval(() => {
         setTimeLeft(t => {
-          if (t <= 1) {
-            clearInterval(intervalRef.current)
-            handleSubmit(true)
-            return 0
-          }
+          if (t <= 1) { clearInterval(intervalRef.current); handleSubmit(); return 0 }
           return t - 1
         })
       }, 1000)
@@ -167,89 +298,70 @@ function TakingTest({ test, section, onSubmit, onBack }) {
     return () => clearInterval(intervalRef.current)
   }, [timerActive, submitted])
 
-  function handleSubmit(auto = false) {
+  function handleSubmit() {
     clearInterval(intervalRef.current)
     setSubmitted(true)
     onSubmit(answers)
   }
 
-  const timerColor = timeLeft <= 120 ? '#f08080' : timeLeft <= 300 ? '#f0b429' : 'var(--text-secondary)'
+  function setAnswer(qNum, letter) {
+    setAnswers(a => { const next = { ...a }; if (letter === undefined) delete next[qNum]; else next[qNum] = letter; return next })
+  }
 
   return (
     <div>
-      {/* Header bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, position: 'sticky', top: 58, background: 'var(--bg-secondary)', padding: '10px 0', zIndex: 5 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <button onClick={onBack} style={{ fontSize: 13, color: 'var(--text-secondary)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>← Back</button>
-          <span style={{ fontSize: 14, fontWeight: 600 }}>Form {test.id} · {m.label}</span>
-          <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>{answered}/{total} answered</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: 20, fontWeight: 700, fontFamily: 'monospace', color: timerColor }}>
-            {formatTime(timeLeft)}
-          </span>
-          {!timerActive ? (
-            <button onClick={() => setTimerActive(true)} style={{ fontSize: 13, padding: '6px 16px', borderRadius: 8, background: 'var(--blue)', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
-              Start Timer
-            </button>
-          ) : (
-            <button onClick={() => handleSubmit(false)} style={{ fontSize: 13, padding: '6px 16px', borderRadius: 8, background: '#2d1a4d', color: '#c49af5', border: '1px solid #c49af5', cursor: 'pointer', fontWeight: 600 }}>
-              Submit
-            </button>
-          )}
-        </div>
-      </div>
+      <TestHeader test={test} section={section} answered={answered} total={total} timeLeft={timeLeft}
+        timerActive={timerActive} onStart={() => setTimerActive(true)} onSubmit={handleSubmit} onBack={onBack} />
 
-      {/* Tip */}
-      {!timerActive && (
+      {!timerActive && !questions && (
         <div style={{ fontSize: 13, color: 'var(--text-secondary)', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, padding: '12px 16px', marginBottom: 20 }}>
-          Open the <strong style={{ color: 'var(--text)' }}>Form {test.id} {m.label} PDF</strong> alongside this window, then hit <strong style={{ color: 'var(--text)' }}>Start Timer</strong> when you're ready. Enter each answer as you go.
+          Open the <strong style={{ color: 'var(--text)' }}>Form {test.id} {m.label} PDF</strong> alongside this window, then hit <strong style={{ color: 'var(--text)' }}>Start Timer</strong> when you're ready.
         </div>
       )}
 
-      {/* Answer grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 8 }}>
-        {Array.from({ length: total }, (_, i) => i + 1).map(qNum => {
-          const choices = getChoices(section, qNum)
-          const chosen = answers[qNum]
-          return (
-            <div key={qNum} style={{
-              display: 'flex', alignItems: 'center', gap: 10,
-              background: chosen ? 'var(--bg-card)' : 'var(--bg)', border: '1px solid var(--border)',
-              borderRadius: 8, padding: '8px 12px',
+      {questions ? (
+        <DigitalTest test={test} section={section} questions={questions} answers={answers} onAnswer={setAnswer} m={m} />
+      ) : (
+        <>
+          {/* Answer grid (fallback for sections without transcribed questions) */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 8 }}>
+            {Array.from({ length: total }, (_, i) => i + 1).map(qNum => {
+              const choices = getChoices(section, qNum)
+              const chosen = answers[qNum]
+              return (
+                <div key={qNum} style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  background: chosen ? 'var(--bg-card)' : 'var(--bg)', border: '1px solid var(--border)',
+                  borderRadius: 8, padding: '8px 12px',
+                }}>
+                  <span style={{ fontSize: 12, color: 'var(--text-tertiary)', width: 24, flexShrink: 0, textAlign: 'right' }}>{qNum}</span>
+                  <div style={{ display: 'flex', gap: 4 }}>
+                    {choices.map(letter => (
+                      <button key={letter} onClick={() => setAnswer(qNum, chosen === letter ? undefined : letter)} style={{
+                        width: 32, height: 32, borderRadius: 6, fontSize: 12, fontWeight: 600,
+                        border: chosen === letter ? 'none' : '1px solid var(--border)',
+                        background: chosen === letter ? m.color : 'transparent',
+                        color: chosen === letter ? '#000' : 'var(--text-secondary)',
+                        cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.1s',
+                      }}>
+                        {letter}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+          <div style={{ marginTop: 24, display: 'flex', justifyContent: 'center' }}>
+            <button onClick={handleSubmit} style={{
+              fontSize: 14, padding: '10px 32px', borderRadius: 10,
+              background: 'var(--blue)', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 600,
             }}>
-              <span style={{ fontSize: 12, color: 'var(--text-tertiary)', width: 24, flexShrink: 0, textAlign: 'right' }}>{qNum}</span>
-              <div style={{ display: 'flex', gap: 4 }}>
-                {choices.map(letter => (
-                  <button
-                    key={letter}
-                    onClick={() => setAnswers(a => ({ ...a, [qNum]: chosen === letter ? undefined : letter }))}
-                    style={{
-                      width: 32, height: 32, borderRadius: 6, fontSize: 12, fontWeight: 600,
-                      border: chosen === letter ? 'none' : '1px solid var(--border)',
-                      background: chosen === letter ? m.color : 'transparent',
-                      color: chosen === letter ? '#000' : 'var(--text-secondary)',
-                      cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.1s',
-                    }}
-                  >
-                    {letter}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )
-        })}
-      </div>
-
-      {/* Submit button (bottom) */}
-      <div style={{ marginTop: 24, display: 'flex', justifyContent: 'center' }}>
-        <button onClick={() => handleSubmit(false)} style={{
-          fontSize: 14, padding: '10px 32px', borderRadius: 10,
-          background: 'var(--blue)', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 600,
-        }}>
-          Submit Answers ({answered}/{total} filled in)
-        </button>
-      </div>
+              Submit Answers ({answered}/{total} filled in)
+            </button>
+          </div>
+        </>
+      )}
     </div>
   )
 }
@@ -259,6 +371,8 @@ function TakingTest({ test, section, onSubmit, onBack }) {
 function Results({ test, section, userAnswers, onRetake, onBack }) {
   const sd = test.sections[section]
   const m = sectionMeta[section]
+  const questions = QUESTION_DATA[test.id]?.[section] ?? null
+  const qMap = questions ? Object.fromEntries(questions.map(q => [q.num, q])) : {}
 
   const results = Array.from({ length: sd.count }, (_, i) => i + 1).map(qNum => {
     const correct = sd.answers[qNum]
@@ -335,7 +449,11 @@ function Results({ test, section, userAnswers, onRetake, onBack }) {
                 <span style={{ fontSize: 13, color: 'var(--text-secondary)', width: 50, flexShrink: 0 }}>Q {r.qNum}</span>
                 <span style={{ fontSize: 13, color: 'var(--red-mid)', fontWeight: 600, width: 40 }}>You: {r.chosen}</span>
                 <span style={{ fontSize: 13, color: 'var(--green-mid)', fontWeight: 600, width: 60 }}>✓ {r.correct}</span>
-                <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>Find Q{r.qNum} in the Form {test.id} {m.label} PDF to review</span>
+                {qMap[r.qNum] ? (
+                  <span style={{ fontSize: 12, color: 'var(--text-secondary)', flex: 1 }}>{qMap[r.qNum].question.slice(0, 120)}{qMap[r.qNum].question.length > 120 ? '…' : ''}</span>
+                ) : (
+                  <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>Find Q{r.qNum} in the Form {test.id} {m.label} PDF to review</span>
+                )}
               </div>
             ))}
           </div>
