@@ -218,11 +218,18 @@ function DigitalTest({ test, section, questions, answers, onAnswer, m }) {
 
         {/* Question card */}
         <div style={{ background: 'var(--bg-card)', border: `1px solid var(--border)`, borderRadius: 12, padding: '20px 22px', marginBottom: 16 }}>
-          <div style={{ fontSize: 11, color: m.color, fontWeight: 700, marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-            Question {q.num} of {questions.length}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <div style={{ fontSize: 11, color: m.color, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              Question {q.num} of {questions.length}
+            </div>
+            {q.passage && (
+              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', background: 'var(--bg-secondary)', padding: '2px 8px', borderRadius: 20 }}>
+                {q.passage}
+              </div>
+            )}
           </div>
-          <div style={{ fontSize: 14, lineHeight: 1.75, marginBottom: q.hasFigure || q.choices.length ? 18 : 0, whiteSpace: 'pre-line' }}>
-            {q.question}
+          <div style={{ fontSize: 14, lineHeight: 1.75, marginBottom: 18, whiteSpace: 'pre-line', color: q.question ? 'var(--text)' : 'var(--text-secondary)', fontStyle: q.question ? 'normal' : 'italic' }}>
+            {q.question || 'Select the best version of the underlined portion in the passage.'}
           </div>
 
           {q.hasFigure && (
