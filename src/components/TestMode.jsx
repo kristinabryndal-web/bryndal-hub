@@ -2,11 +2,53 @@ import React, { useState, useEffect, useRef } from 'react'
 import { practiceTests, sectionMeta, getChoices, lookupScaled } from '../data/practiceTests.js'
 import { g19Math, g20Math, h11Math } from '../data/testQuestions.js'
 import { g19English, g20English, h11English } from '../data/englishQuestions.js'
+import { passages } from '../data/englishPassages.js'
 
 const QUESTION_DATA = {
   G19: { math: g19Math, english: g19English },
   G20: { math: g20Math, english: g20English },
   H11: { math: h11Math, english: h11English },
+}
+
+// Render passage text with [N] markers as highlighted spans
+function PassageText({ text, activeNum }) {
+  const parts = []
+  const regex = /\[(\d+)\]([^\[]*)/g
+  let lastIndex = 0
+  let match
+
+  // Text before first marker
+  const firstMarker = text.search(/\[\d+\]/)
+  if (firstMarker > 0) parts.push({ type: 'text', content: text.slice(0, firstMarker) })
+
+  while ((match = regex.exec(text)) !== null) {
+    const num = parseInt(match[1])
+    const markedText = match[2]
+    const isActive = num === activeNum
+    parts.push({ type: 'marker', num, content: markedText, active: isActive })
+  }
+
+  return (
+    <div style={{ fontSize: 13, lineHeight: 1.85, whiteSpace: 'pre-wrap', color: 'var(--text)' }}>
+      {parts.map((p, i) => {
+        if (p.type === 'text') return <span key={i}>{p.content}</span>
+        return (
+          <span key={i}>
+            <span style={{
+              background: p.active ? '#7dda7d33' : 'transparent',
+              borderBottom: `2px solid ${p.active ? '#7dda7d' : 'var(--border-hover)'}`,
+              borderRadius: p.active ? 2 : 0,
+              padding: p.active ? '0 1px' : 0,
+              transition: 'all 0.2s',
+            }}>
+              <sup style={{ fontSize: 9, color: p.active ? '#7dda7d' : 'var(--text-tertiary)', marginRight: 1 }}>{p.num}</sup>
+              {p.content}
+            </span>
+          </span>
+        )
+      })}
+    </div>
+  )
 }
 
 const STORAGE_KEY = 'bryndal_test_history'
@@ -183,6 +225,10 @@ function DigitalTest({ test, section, questions, answers, onAnswer, m }) {
   const prevContext = current > 0 ? questions[current - 1].context : null
   const showContext = q.context || (q.contextRef && !prevContext)
 
+  // For English, find the passage for the current question
+  const passageId = q.passage || null
+  const passage = passageId ? passages[passageId] : null
+
   return (
     <div style={{ display: 'flex', gap: 20 }}>
       {/* Question navigator sidebar */}
@@ -207,9 +253,21 @@ function DigitalTest({ test, section, questions, answers, onAnswer, m }) {
         </div>
       </div>
 
+      {/* Passage panel (English) */}
+      {passage && (
+        <div style={{ flex: '0 0 380px', maxHeight: 'calc(100vh - 140px)', overflowY: 'auto', position: 'sticky', top: 100 }}>
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12, padding: '18px 20px' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 12 }}>
+              {passage.title}
+            </div>
+            <PassageText text={passage.text} activeNum={q.num} />
+          </div>
+        </div>
+      )}
+
       {/* Main question area */}
-      <div style={{ flex: 1 }}>
-        {/* Context block */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        {/* Context block (Math multi-part) */}
         {showContext && (
           <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 18px', marginBottom: 16, fontSize: 13, lineHeight: 1.7, color: 'var(--text-secondary)', whiteSpace: 'pre-line' }}>
             {q.context || q.contextRef}
