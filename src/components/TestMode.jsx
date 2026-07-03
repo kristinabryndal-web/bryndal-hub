@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { practiceTests, sectionMeta, getChoices, lookupScaled } from '../data/practiceTests.js'
-import { g19Math, g20Math, h11Math } from '../data/testQuestions.js'
-import { g19English, g20English, h11English } from '../data/englishQuestions.js'
+import { g19Math, g20Math, h11Math, h31Math } from '../data/testQuestions.js'
+import { g19English, g20English, h11English, h31English } from '../data/englishQuestions.js'
 import { passages } from '../data/englishPassages.js'
 import { supabase } from '../supabase.js'
 
@@ -9,6 +9,7 @@ const QUESTION_DATA = {
   G19: { math: g19Math, english: g19English },
   G20: { math: g20Math, english: g20English },
   H11: { math: h11Math, english: h11English },
+  H31: { math: h31Math, english: h31English },
 }
 
 // Render passage text with [N] markers as highlighted spans
