@@ -303,11 +303,22 @@ function DigitalTest({ test, section, questions, answers, onAnswer, m }) {
             {q.question || 'Select the best version of the underlined portion in the passage.'}
           </div>
 
-          {q.hasFigure && (
-            <div style={{ background: 'var(--bg-secondary)', border: '1px dashed var(--border)', borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: 12, color: 'var(--text-secondary)', fontStyle: 'italic' }}>
-              📐 {q.figure || 'Figure — refer to the printed test booklet for the diagram.'}
-            </div>
-          )}
+          {q.hasFigure && (() => {
+            const imgSrc = `/figures/${test.id.toLowerCase()}-math-q${q.num}.png`
+            return (
+              <div style={{ marginBottom: 16 }}>
+                <img
+                  src={imgSrc}
+                  alt={`Figure for question ${q.num}`}
+                  style={{ maxWidth: '100%', maxHeight: 320, borderRadius: 8, background: '#fff', padding: 10, display: 'block' }}
+                  onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block' }}
+                />
+                <div style={{ display: 'none', background: 'var(--bg-secondary)', border: '1px dashed var(--border)', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: 'var(--text-secondary)', fontStyle: 'italic' }}>
+                  📐 {q.figure || 'Figure — refer to the printed test booklet for the diagram.'}
+                </div>
+              </div>
+            )
+          })()}
 
           {/* Answer choices */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
