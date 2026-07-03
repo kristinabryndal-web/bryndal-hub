@@ -3,6 +3,7 @@ import { practiceTests, sectionMeta, getChoices, lookupScaled } from '../data/pr
 import { g19Math, g20Math, h11Math } from '../data/testQuestions.js'
 import { g19English, g20English, h11English } from '../data/englishQuestions.js'
 import { passages } from '../data/englishPassages.js'
+import { supabase } from '../supabase.js'
 
 const QUESTION_DATA = {
   G19: { math: g19Math, english: g19English },
@@ -51,13 +52,25 @@ function PassageText({ text, activeNum }) {
   )
 }
 
-const STORAGE_KEY = 'bryndal_test_history'
-
-function loadHistory() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]') } catch { return [] }
+async function fetchHistory() {
+  const { data, error } = await supabase
+    .from('practice_test_attempts')
+    .select('*')
+    .order('created_at', { ascending: false })
+  if (error) { console.error('Failed to load test history:', error); return [] }
+  return (data || []).map(r => ({
+    testId: r.test_id, section: r.section, raw: r.raw, total: r.total,
+    scaled: r.scaled, date: r.created_at, answers: r.answers,
+  }))
 }
-function saveHistory(history) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(history))
+
+async function saveAttempt(record) {
+  const { error } = await supabase.from('practice_test_attempts').insert([{
+    test_id: record.testId, section: record.section,
+    raw: record.raw, total: record.total, scaled: record.scaled,
+    answers: record.answers,
+  }])
+  if (error) console.error('Failed to save test attempt:', error)
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -80,8 +93,7 @@ function formatTime(secs) {
 
 // ── Screen: Select Test ────────────────────────────────────────────────────
 
-function SelectTest({ onSelect }) {
-  const history = loadHistory()
+function SelectTest({ onSelect, history, loading }) {
   return (
     <div>
       <div style={{ fontSize: 22, fontWeight: 500, marginBottom: 4 }}>Full Practice Tests</div>
@@ -133,6 +145,7 @@ function SelectTest({ onSelect }) {
         })}
       </div>
 
+      {loading && <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 20 }}>Loading score history…</div>}
       {history.length > 0 && <HistoryTable history={history} />}
     </div>
   )
@@ -140,8 +153,8 @@ function SelectTest({ onSelect }) {
 
 // ── Screen: Select Section ─────────────────────────────────────────────────
 
-function SelectSection({ test, onSelect, onBack }) {
-  const history = loadHistory().filter(h => h.testId === test.id)
+function SelectSection({ test, onSelect, onBack, allHistory }) {
+  const history = allHistory.filter(h => h.testId === test.id)
 
   return (
     <div>
@@ -588,8 +601,18 @@ export default function TestMode() {
   const [selectedTest, setSelectedTest]       = useState(null)
   const [selectedSection, setSelectedSection] = useState(null)
   const [userAnswers, setUserAnswers]         = useState({})
+  const [history, setHistory]                 = useState([])
+  const [historyLoading, setHistoryLoading]   = useState(true)
 
-  function handleSubmit(answers) {
+  useEffect(() => { refreshHistory() }, [])
+
+  async function refreshHistory() {
+    setHistoryLoading(true)
+    setHistory(await fetchHistory())
+    setHistoryLoading(false)
+  }
+
+  async function handleSubmit(answers) {
     const sd     = selectedTest.sections[selectedSection]
     const raw    = Object.entries(answers).filter(([q, a]) => sd.answers[Number(q)] === a).length
     const scaled = lookupScaled(selectedSection, raw)
@@ -598,8 +621,8 @@ export default function TestMode() {
       raw, total: sd.count, scaled,
       date: new Date().toISOString(), answers,
     }
-    const history = loadHistory()
-    saveHistory([record, ...history])
+    await saveAttempt(record)
+    setHistory(h => [record, ...h])
     setUserAnswers(answers)
     setScreen('results')
   }
@@ -631,6 +654,7 @@ export default function TestMode() {
     return (
       <SelectSection
         test={selectedTest}
+        allHistory={history}
         onSelect={sec => { setSelectedSection(sec); setUserAnswers({}); setScreen('taking') }}
         onBack={() => { setSelectedTest(null); setScreen('select-test') }}
       />
@@ -639,6 +663,8 @@ export default function TestMode() {
 
   return (
     <SelectTest
+      history={history}
+      loading={historyLoading}
       onSelect={t => { setSelectedTest(t); setScreen('select-section') }}
     />
   )
