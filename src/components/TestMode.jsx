@@ -13,22 +13,41 @@ const QUESTION_DATA = {
 }
 
 // Render passage text with [N] markers as highlighted spans
-function PassageText({ text, activeNum }) {
+// Parses [N]underlined text[/] markers. If a marker has no explicit [/]
+// closer, the underline extends to the next marker (legacy passages).
+function parsePassageMarkers(text) {
   const parts = []
-  const regex = /\[(\d+)\]([^\[]*)/g
-  let lastIndex = 0
+  const markerStart = /\[(\d+)\]/g
+  let cursor = 0
   let match
 
-  // Text before first marker
-  const firstMarker = text.search(/\[\d+\]/)
-  if (firstMarker > 0) parts.push({ type: 'text', content: text.slice(0, firstMarker) })
-
-  while ((match = regex.exec(text)) !== null) {
+  while ((match = markerStart.exec(text)) !== null) {
+    if (match.index > cursor) parts.push({ type: 'text', content: text.slice(cursor, match.index) })
     const num = parseInt(match[1])
-    const markedText = match[2]
-    const isActive = num === activeNum
-    parts.push({ type: 'marker', num, content: markedText, active: isActive })
+    const contentStart = markerStart.lastIndex
+    const closeIdx = text.indexOf('[/]', contentStart)
+    const nextMarkerMatch = /\[\d+\]/.exec(text.slice(contentStart))
+    const nextMarkerIdx = nextMarkerMatch ? contentStart + nextMarkerMatch.index : text.length
+
+    let contentEnd, resumeAt
+    if (closeIdx !== -1 && closeIdx < nextMarkerIdx) {
+      contentEnd = closeIdx
+      resumeAt = closeIdx + 3
+    } else {
+      contentEnd = nextMarkerIdx
+      resumeAt = nextMarkerIdx
+    }
+
+    parts.push({ type: 'marker', num, content: text.slice(contentStart, contentEnd) })
+    cursor = resumeAt
+    markerStart.lastIndex = resumeAt
   }
+  if (cursor < text.length) parts.push({ type: 'text', content: text.slice(cursor) })
+  return parts
+}
+
+function PassageText({ text, activeNum }) {
+  const parts = parsePassageMarkers(text).map(p => p.type === 'marker' ? { ...p, active: p.num === activeNum } : p)
 
   return (
     <div style={{ fontSize: 13, lineHeight: 1.85, whiteSpace: 'pre-wrap', color: 'var(--text)' }}>
