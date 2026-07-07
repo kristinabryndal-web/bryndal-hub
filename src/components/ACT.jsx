@@ -5,6 +5,7 @@ import { actData } from '../data/act.js'
 import Practice from './Practice.jsx'
 import { PracticeQuiz } from './PracticeQuiz.jsx'
 import { actConventions } from '../data/practiceQuestions.js'
+import TopicDrills from './TopicDrills.jsx'
 
 export default function ACT() {
   const [tests, setTests] = useState([])
@@ -163,6 +164,10 @@ export default function ACT() {
           subtitle="ACT-style passage questions targeting grammar and usage"
           questions={actConventions}
         />
+      </div>
+
+      <div style={{ marginTop: 32 }}>
+        <TopicDrills />
       </div>
     </div>
   )
