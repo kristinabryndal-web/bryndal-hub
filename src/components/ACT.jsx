@@ -5,8 +5,6 @@ import { actData } from '../data/act.js'
 import Practice from './Practice.jsx'
 import { PracticeQuiz } from './PracticeQuiz.jsx'
 import { actConventions } from '../data/practiceQuestions.js'
-import TopicDrills from './TopicDrills.jsx'
-import DashSets from './DashSets.jsx'
 
 export default function ACT() {
   const [tests, setTests] = useState([])
@@ -167,13 +165,6 @@ export default function ACT() {
         />
       </div>
 
-      <div style={{ marginTop: 32 }}>
-        <TopicDrills />
-      </div>
-
-      <div style={{ marginTop: 32 }}>
-        <DashSets />
-      </div>
     </div>
   )
 }

@@ -31,6 +31,19 @@ function QuizQuestion({ q, index, total, onAnswered }) {
         {q.question}
       </div>
 
+      {q.image && (
+        <div style={{ marginBottom: 12, textAlign: 'center' }}>
+          <img
+            src={q.image}
+            alt="Figure for this question"
+            style={{
+              maxWidth: '100%', height: 'auto', borderRadius: 6,
+              border: '1px solid var(--border)', background: 'white', padding: 8,
+            }}
+          />
+        </div>
+      )}
+
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         {q.choices.map((choice, ci) => {
           let bg = 'var(--bg-secondary)'

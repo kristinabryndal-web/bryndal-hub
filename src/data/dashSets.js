@@ -14,6 +14,7 @@ export const dash1Drill = [
     choices: ['40', '52', '56', '66', '80'],
     correct: 4,
     explain: "For a rectilinear (right-angle) figure with no inward notches, perimeter = 2×width + 2×height = 2(26) + 2(14) = 52 + 28 = 80.",
+    image: '/drill-images/dash1-q41.png',
     source: '12-Minute Dash Set 1',
   },
   {
@@ -70,6 +71,7 @@ export const dash1Drill = [
     choices: ['This total is always equal to 25 regardless of the number of rows.', 'This total is equal to twice the number of rows.', 'This total is equal to 5 times the number of rows.', 'This total is equal to the square of the number of rows.', 'There is no consistent relationship between this total and the number of rows.'],
     correct: 3,
     explain: "The sum of the first n odd numbers (1 + 3 + 5 + …) is n². So the total is the square of the number of rows.",
+    image: '/drill-images/dash1-q49.png',
     source: '12-Minute Dash Set 1',
   },
   {
@@ -91,6 +93,7 @@ export const dash1Drill = [
     choices: ['8', '16', '20', '30', '40'],
     correct: 2,
     explain: "Number of diagonals = n(n−3)/2 = 8(5)/2 = 20.",
+    image: '/drill-images/dash1-q52.png',
     source: '12-Minute Dash Set 1',
   },
   {
@@ -112,6 +115,7 @@ export const dash1Drill = [
     choices: ['y ≤ −2x and x ≥ 3', 'y ≤ −2x or x ≥ 3', 'y ≥ −2x and x ≥ 3', 'y ≥ −2x or x ≥ 3', 'y ≥ −2x and x ≤ 3'],
     correct: 0,
     explain: "Right of the vertical line is x ≥ 3; below the line is y ≤ −2x. Both conditions must hold, so 'y ≤ −2x and x ≥ 3.'",
+    image: '/drill-images/dash1-q55.png',
     source: '12-Minute Dash Set 1',
   },
   {
@@ -126,6 +130,7 @@ export const dash1Drill = [
     choices: ['A line of slope 2 through (1,3) with an open hole at (0,1)', 'A line of slope 3 through the origin and (1,3)', 'A line through (0,2) and (1,3)', 'An upward parabola through (−1,3), (1,3), with an open hole at (0,1)', 'An upward parabola through (−1,2) and (1,2) with vertex at the origin'],
     correct: 0,
     explain: "For x ≠ 0, (2x² + x)/x = 2x + 1 — a line of slope 2 and y-intercept 1, but undefined at x = 0, giving an open hole at (0,1).",
+    image: '/drill-images/dash1-q57.png',
     source: '12-Minute Dash Set 1',
   },
   {
@@ -147,6 +152,7 @@ export const dash1Drill = [
     choices: ['1/4', '1/2', '(√3 − 2)/4', '(√3 − √2)/2', '(√6 − √2)/4'],
     correct: 4,
     explain: "sin(π/3 − π/4) = (√3/2)(√2/2) − (1/2)(√2/2) = √6/4 − √2/4 = (√6 − √2)/4.",
+    image: '/drill-images/dash1-q60.png',
     source: '12-Minute Dash Set 1',
   },
 ]
@@ -213,6 +219,7 @@ export const dash8Drill = [
     choices: ['Everything above the dashed line y = −x + 1 only', 'The region between the two dashed lines y = −x + 1 and y = −x − 1', 'Everything below the dashed line y = −x − 1 only', 'Both the region above y = −x + 1 and the region below y = −x − 1 (both boundary lines dashed), leaving the diagonal band between them unshaded', 'The single dashed line y = −x'],
     correct: 3,
     explain: "|x + y| > 1 means x + y > 1 or x + y < −1 — the two regions outside the diagonal band between the dashed lines y = −x + 1 and y = −x − 1.",
+    image: '/drill-images/dash8-q53.png',
     source: '12-Minute Dash Set 8 (ACT-65D)',
   },
   {
@@ -227,6 +234,7 @@ export const dash8Drill = [
     choices: ['50°', '55°', '70°', '80°', '90°'],
     correct: 2,
     explain: "Tracking the beam through the reflections and using the triangle/straight-angle relationships among the 75°, 90°, and 40° angles gives the indicated angle as 70°.",
+    image: '/drill-images/dash8-q55.png',
     source: '12-Minute Dash Set 8 (ACT-65D)',
   },
   {
@@ -234,6 +242,7 @@ export const dash8Drill = [
     choices: ['Closed dots at c−2 and c+2, nothing shaded between or outside', 'Closed dots at c−2 and c+2, shading only the segment between them', 'A closed dot at c−2 with shading extending left (only)', 'A closed dot at c+2 with shading extending right (only)', 'Closed dots at c−2 and c+2, shading extending left from c−2 and right from c+2'],
     correct: 4,
     explain: "|x − c| ≥ 2 means x ≤ c − 2 or x ≥ c + 2 — closed endpoints at c−2 and c+2 with shading going outward in both directions.",
+    image: '/drill-images/dash8-q56.png',
     source: '12-Minute Dash Set 8 (ACT-65D)',
   },
   {
@@ -241,6 +250,7 @@ export const dash8Drill = [
     choices: ['2/3', '1/6', '5/6', '6/7', '1'],
     correct: 0,
     explain: "A line splits a square into 2 congruent regions when it passes through the center, (3,4). So 4 = a(3) + 2, giving 3a = 2, a = 2/3.",
+    image: '/drill-images/dash8-q57.png',
     source: '12-Minute Dash Set 8 (ACT-65D)',
   },
   {
@@ -262,6 +272,7 @@ export const dash8Drill = [
     choices: ['0%', '2%', '6%', '11%', '13%'],
     correct: 3,
     explain: "Right solid (2×1×2 prism) has surface area 16; the left L-shaped solid has surface area 18. (18 − 16)/18 = 2/18 ≈ 11%.",
+    image: '/drill-images/dash8-q60.png',
     source: '12-Minute Dash Set 8 (ACT-65D)',
   },
 ]

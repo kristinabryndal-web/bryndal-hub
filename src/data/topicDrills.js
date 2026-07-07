@@ -20,6 +20,7 @@ export const areaProportionDrill = [
     choices: ['1', '2', '3', '4', '5'],
     correct: 2,
     explain: "Split into a 18×10 top rectangle (180 sq ft) and an 8×5 bottom rectangle (40 sq ft): 220 sq ft total. 220 ÷ 100 = 2.2, round up to 3 cans.",
+    image: '/drill-images/area-q14.png',
     source: '0556A',
   },
   {
@@ -48,6 +49,7 @@ export const areaProportionDrill = [
     choices: ['$ 25.00', '$ 95.00', '$110.00', '$150.00', '$190.00'],
     correct: 1,
     explain: "Area = ½ × 150 × 80 = 6,000 sq ft. 6,000 ÷ 500 = 12 bags. 12 × $7.99 = $95.88, closest to $95.00.",
+    image: '/drill-images/area-q38.png',
     source: '0606 63F',
   },
   {
@@ -312,6 +314,7 @@ export const percentsDrill = [
     choices: ['8%', '25%', '40%', '45%', '67%'],
     correct: 2,
     explain: "The National League (N) won 8 of the 20 Series. 8/20 = 40%.",
+    image: '/drill-images/pct-q19.png',
     source: '1205 63C',
   },
   {
@@ -319,6 +322,7 @@ export const percentsDrill = [
     choices: ['5%', '8%', '10%', '17%', '20%'],
     correct: 2,
     explain: "October total = $600 − $60 − $40 = $500. Entertainment stays $50. 50/500 = 10%.",
+    image: '/drill-images/pct-q39.png',
     source: '1208 67A',
   },
   {
@@ -347,6 +351,7 @@ export const percentsDrill = [
     choices: ['6%', '12%', '14%', '16%', '19%'],
     correct: 2,
     explain: "Hours = 4×3 + 2×2 = 16, so she donates 16 × $3 = $48. Profit = 30(2) + 70(4) = $340. 48/340 ≈ 14%.",
+    image: '/drill-images/pct-q51.png',
     source: '0609 67C',
   },
   {
@@ -354,6 +359,7 @@ export const percentsDrill = [
     choices: ['48', '44', '42', '40', '33'],
     correct: 1,
     explain: "Multiply by 1.1 each week from $30: W2 = 33, W3 = 36.3, W4 = 39.93, W5 ≈ 43.9 ≈ 44.",
+    image: '/drill-images/pct-q52.png',
     source: '0409 66F',
   },
   {
@@ -361,6 +367,7 @@ export const percentsDrill = [
     choices: ['32,000', '43,000,000', '97,000,000', '110,000,000', '4,300,000,000'],
     correct: 2,
     explain: "64,654,160 ÷ 0.667 ≈ 96,900,000 ≈ 97,000,000.",
+    image: '/drill-images/pct-q34.png',
     source: '0606 63F',
   },
   {
@@ -368,6 +375,7 @@ export const percentsDrill = [
     choices: ['88%', '87%', '74%', '13%', '12%'],
     correct: 3,
     explain: "Increase = 78 − 69 = 9. 9 ÷ 69 ≈ 0.13 = 13%.",
+    image: '/drill-images/pct-q40.png',
     source: '0605 61D',
   },
 ]
@@ -448,6 +456,7 @@ export const sequencesSeriesDrill = [
     choices: ['14', '15', '16', '34', '35'],
     correct: 2,
     explain: "The bottom (row 1) has 25; each row up loses 1 can. Top row (row 10) = 25 − 9 = 16.",
+    image: '/drill-images/seq-q21.png',
     source: '0404 61F',
   },
   {
@@ -511,6 +520,7 @@ export const sequencesSeriesDrill = [
     choices: ['100n', '300n', '300·3ⁿ', '100·3ⁿ⁻¹', '300·3ⁿ⁻¹'],
     correct: 3,
     explain: "The count roughly triples each day starting from 100: 100·3ⁿ⁻¹ gives 100, 300, 900, 2,700, 8,100 — closest to the data.",
+    image: '/drill-images/seq-q26.png',
     source: '0604 61B',
   },
   {
